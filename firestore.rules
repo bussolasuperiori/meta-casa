@@ -1,0 +1,17 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Si accede solo conoscendo il codice casa (24 caratteri casuali).
+    // Non è possibile elencare le case: senza codice non si vede nulla.
+    match /case/{casa}/movimenti/{id} {
+      allow read, delete: if casa.size() >= 20;
+      allow create, update: if casa.size() >= 20
+        && request.resource.data.tipo in ['spesa', 'rimborso']
+        && request.resource.data.pagatoDa in ['L', 'C']
+        && request.resource.data.importo is int
+        && request.resource.data.importo > 0
+        && request.resource.data.importo < 10000000
+        && request.resource.data.data is string;
+    }
+  }
+}
